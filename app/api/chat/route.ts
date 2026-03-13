@@ -11,7 +11,7 @@ const client = new BedrockRuntimeClient({
 
 export async function POST(req: NextRequest) {
   try {
-    const { messages } = await req.json();
+    const { messages, language } = await req.json();
 
     const command = new InvokeModelCommand({
       modelId: "amazon.nova-lite-v1:0",
@@ -27,7 +27,8 @@ export async function POST(req: NextRequest) {
             text: `You are FarmAssist, an expert AI farm advisor for 
             smallholder farmers in Africa and worldwide. Give practical, 
             clear advice about crops, pests, weather, fertilizers and 
-            market prices. Keep answers concise and farmer-friendly.`,
+            market prices. Keep answers concise and farmer-friendly. 
+            IMPORTANT: Please respond primarily in ${language || "English"}.`,
           },
         ],
         inferenceConfig: {

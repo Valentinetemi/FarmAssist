@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { Send, Mic, Menu, X } from "lucide-react";
+import ReactMarkdown from "react-markdown";
 
 interface Message {
   role: "user" | "assistant";
@@ -41,18 +42,30 @@ export default function FarmAssist() {
         const recognition = new SpeechRecognition();
         recognition.continuous = false;
         recognition.interimResults = true;
-        recognition.lang = "en-US";
+        
+        // Map selected language to BCP 47 codes
+        const langMap: Record<string, string> = {
+          "English": "en-US",
+          "Yoruba": "yo-NG",
+          "Hausa": "ha-NG",
+          "Igbo": "ig-NG",
+          "Français": "fr-FR",
+          "Swahili": "sw-KE"
+        };
+        recognition.lang = langMap[selectedLanguage] || "en-US";
 
         recognition.onstart = () => {
           setIsRecording(true);
         };
 
         recognition.onresult = (event: any) => {
-          let transcript = "";
+          let currentTranscript = "";
           for (let i = event.resultIndex; i < event.results.length; i++) {
-            transcript += event.results[i][0].transcript;
+            if (event.results[i].isFinal) {
+              const finalTranscript = event.results[i][0].transcript;
+              setInput((prev) => prev + (prev ? " " : "") + finalTranscript);
+            }
           }
-          setInput((prev) => prev + (prev ? " " : "") + transcript);
         };
 
         recognition.onend = () => {
@@ -67,7 +80,7 @@ export default function FarmAssist() {
         recognitionRef.current = recognition;
       }
     }
-  }, []);
+  }, [selectedLanguage]);
 
   // Hide splash screen after 2 seconds
   useEffect(() => {
@@ -147,24 +160,31 @@ export default function FarmAssist() {
       const data = await response.json();
       const assistantMessage: Message = {
         role: "assistant",
-        content: data.message,
+        content: data.message || data.error || "Sorry, I encountered an error. Please try again.",
         timestamp: new Date(),
       };
 
       setMessages((prev) => [...prev, assistantMessage]);
 
-      // Update chat with AI preview if it's the first message
+      // Update chat history with AI response
       if (chatId) {
         setChats((prev) =>
-          prev.map((chat) =>
-            chat.id === chatId
-              ? {
-                  ...chat,
-                  preview: data.message.substring(0, 60),
-                  messages: [...chat.messages, userMessage, assistantMessage],
-                }
-              : chat,
-          ),
+          prev.map((chat) => {
+            if (chat.id === chatId) {
+              // Avoid duplicating user message for new chats
+              const hasUserMessage = chat.messages.some(
+                (m) => m.timestamp.getTime() === userMessage.timestamp.getTime() && m.content === userMessage.content
+              );
+              return {
+                ...chat,
+                preview: (data.message || "").substring(0, 60),
+                messages: hasUserMessage 
+                  ? [...chat.messages, assistantMessage]
+                  : [...chat.messages, userMessage, assistantMessage],
+              };
+            }
+            return chat;
+          }),
         );
       }
     } catch (error) {
@@ -535,12 +555,88 @@ export default function FarmAssist() {
                       <div className="w-8 h-8 bg-[#f9f8f5] border-2 border-[#2d6a1a] rounded-full flex items-center justify-center text-lg flex-shrink-0 mt-1">
                         🌾
                       </div>
-                      <div className="max-w-xs md:max-w-md lg:max-w-lg">
-                        <div className="bg-white border border-[#e5e5e0] rounded-3xl rounded-tl-lg px-6 py-3 shadow-sm">
-                          <p className="text-base text-[#0f1a08]">
-                            {msg.content}
-                          </p>
-                        </div>
+                      <div className="bg-white border border-[#e5e5e0] rounded-3xl rounded-tl-lg px-6 py-4 shadow-sm">
+  <ReactMarkdown
+    components={{
+      p: ({ children }) => (
+        <p style={{ marginBottom: 10, lineHeight: 1.75, fontSize: 15, color: "#1a2e0a" }}>
+          {children}
+        </p>
+      ),
+      strong: ({ children }) => (
+        <strong style={{ fontWeight: 700, color: "#2d6a1a" }}>
+          {children}
+        </strong>
+      ),
+      ol: ({ children }) => (
+        <ol style={{ paddingLeft: 20, marginBottom: 10, marginTop: 6 }}>
+          {children}
+        </ol>
+      ),
+      ul: ({ children }) => (
+        <ul style={{ paddingLeft: 20, marginBottom: 10, marginTop: 6 }}>
+          {children}
+        </ul>
+      ),
+      li: ({ children }) => (
+        <li style={{
+          marginBottom: 8,
+          lineHeight: 1.75,
+          fontSize: 15,
+          color: "#1a2e0a",
+          paddingLeft: 4,
+        }}>
+          {children}
+        </li>
+      ),
+      h1: ({ children }) => (
+        <h1 style={{ fontWeight: 800, fontSize: 20, color: "#1a2e0a", marginBottom: 8, marginTop: 12 }}>
+          {children}
+        </h1>
+      ),
+      h2: ({ children }) => (
+        <h2 style={{ fontWeight: 700, fontSize: 17, color: "#2d6a1a", marginBottom: 6, marginTop: 10 }}>
+          {children}
+        </h2>
+      ),
+      h3: ({ children }) => (
+        <h3 style={{ fontWeight: 700, fontSize: 15, color: "#2d6a1a", marginBottom: 6, marginTop: 10 }}>
+          {children}
+        </h3>
+      ),
+      blockquote: ({ children }) => (
+        <blockquote style={{
+          borderLeft: "3px solid #6dbe3e",
+          paddingLeft: 14,
+          marginLeft: 0,
+          marginBottom: 10,
+          color: "#4a7a2a",
+          fontStyle: "italic",
+        }}>
+          {children}
+        </blockquote>
+      ),
+      code: ({ children }) => (
+        <code style={{
+          background: "#f0f7e8",
+          color: "#2d6a1a",
+          padding: "2px 7px",
+          borderRadius: 5,
+          fontSize: 13,
+          fontFamily: "JetBrains Mono, monospace",
+        }}>
+          {children}
+        </code>
+      ),
+      hr: () => (
+        <hr style={{ border: "none", borderTop: "1px solid #e5eed8", margin: "12px 0" }} />
+      ),
+    }}
+  >
+    {msg.content}
+  </ReactMarkdown>
+</div>
+<div>
                         <p className="text-xs text-[#8a9a7a] mt-1">
                           {formatTime(msg.timestamp)}
                         </p>
