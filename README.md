@@ -29,7 +29,7 @@
 
 ## 🌍 The Problem
 
-Over **33 million smallholder farmers** across Africa and the developing world make life-changing decisions every single day — what to plant, how to treat sick crops, when to sell, where to buy supplies — with **zero access to expert agricultural guidance.**
+Over **33 million smallholder farmers** across Africa and the developing world make life-changing decisions every single day — what to plant, how to treat sick crops, when to sell, where to buy supplies, with **zero access to expert agricultural guidance.**
 
 A bad decision doesn't just mean a bad harvest. It means a family goes hungry. It means a child doesn't go to school. It means a livelihood is lost.
 
