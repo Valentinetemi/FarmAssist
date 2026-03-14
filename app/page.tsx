@@ -82,9 +82,9 @@ export default function FarmAssist() {
     }
   }, [selectedLanguage]);
 
-  // Hide splash screen after 2 seconds
+  // Hide splash screen after 4 seconds
   useEffect(() => {
-    const timer = setTimeout(() => setShowSplash(false), 2000);
+    const timer = setTimeout(() => setShowSplash(false), 4000);
     return () => clearTimeout(timer);
   }, []);
 
@@ -247,23 +247,11 @@ export default function FarmAssist() {
   // Splash screen
   if (showSplash) {
     return (
-      <div className="fixed inset-0 bg-white flex flex-col items-center justify-center fade-out-animation">
-        <div className="flex flex-col items-center gap-6">
-          <div className="relative">
-            <img
-              src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=1200&auto=format&fit=crop"
-              alt="Farm landscape"
-              className="w-96 h-64 object-cover rounded-2xl shadow-lg"
-            />
-          </div>
-          <h1 className="font-serif text-4xl font-bold text-[#2d6a1a]">
-            FarmAssist
-          </h1>
-          <p className="text-sm text-[#8a9a7a] font-satoshi">
-            AI-powered advice for every farmer
-          </p>
-          <div className="w-16 h-1 bg-gradient-to-r from-transparent via-[#6dbe3e] to-transparent rounded-full"></div>
-        </div>
+      <div className="fixed inset-0 bg-[#f9f8f5] flex flex-col items-center justify-center">
+        <span className="text-6xl mb-6 animate-bounce">👋</span>
+        <h1 className="font-serif text-4xl font-bold text-[#2d6a1a]">
+          Welcome to FarmAssist
+        </h1>
       </div>
     );
   }
