@@ -82,9 +82,9 @@ export default function FarmAssist() {
     }
   }, [selectedLanguage]);
 
-  // Hide splash screen after 4 seconds
+  // Hide splash screen after 1 seconds
   useEffect(() => {
-    const timer = setTimeout(() => setShowSplash(false), 4000);
+    const timer = setTimeout(() => setShowSplash(false), 1000);
     return () => clearTimeout(timer);
   }, []);
 
